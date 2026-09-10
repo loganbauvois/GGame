@@ -26,12 +26,14 @@ public class PlayerCombat : MonoBehaviour
     public event Action AttackStarted;
 
     private PlayerInputReader inputReader;
+    private PlayerController playerController;
     private float attackTimer;
     private float cooldownTimer;
 
     private void Awake()
     {
         inputReader = GetComponent<PlayerInputReader>();
+        playerController = GetComponent<PlayerController>();
 
         if (attackOrigin == null)
         {
@@ -55,7 +57,9 @@ public class PlayerCombat : MonoBehaviour
             return;
         }
 
-        if (cooldownTimer <= 0f && inputReader.AttackPressedThisFrame)
+        if (cooldownTimer <= 0f
+            && inputReader.AttackPressedThisFrame
+            && (playerController == null || playerController.IsGrounded))
         {
             if (logCombatEvents)
             {

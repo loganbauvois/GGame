@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerController))]
@@ -39,6 +40,8 @@ public class PlayerAnimator : MonoBehaviour
     private int fallStateHash;
     private int attackStateHash;
     private bool attackAnimationLocked;
+
+    public event Action AttackAnimationFinished;
 
     private void Reset()
     {
@@ -123,6 +126,7 @@ public class PlayerAnimator : MonoBehaviour
             if (HasFinishedState(attackStateHash))
             {
                 attackAnimationLocked = false;
+                AttackAnimationFinished?.Invoke();
             }
             else
             {

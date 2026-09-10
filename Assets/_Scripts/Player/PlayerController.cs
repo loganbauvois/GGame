@@ -24,9 +24,11 @@ public class PlayerController : MonoBehaviour
 	private CharacterController characterController;
 	private PlayerInputReader inputReader;
 	private PlayerCombat playerCombat;
+	private PlayerAnimator playerAnimator;
 	private Vector3 planarVelocity;
 	private float verticalVelocity;
 	private bool attackMovementLocked;
+	private bool attackControlLocked;
 	private float airborneDuration;
 
 	public float HorizontalSpeed => planarVelocity.magnitude;
@@ -41,6 +43,7 @@ public class PlayerController : MonoBehaviour
 		characterController = GetComponent<CharacterController>();
 		inputReader = GetComponent<PlayerInputReader>();
 		playerCombat = GetComponent<PlayerCombat>();
+		playerAnimator = GetComponent<PlayerAnimator>();
 		ValidateCharacterController();
 
 		if (cameraTransform == null && Camera.main != null)
@@ -55,6 +58,11 @@ public class PlayerController : MonoBehaviour
 		{
 			playerCombat.AttackStarted += LockMovementForAttack;
 		}
+
+		if (playerAnimator != null)
+		{
+			playerAnimator.AttackAnimationFinished += UnlockMovementAfterAttack;
+		}
 	}
 
 	private void OnDisable()
@@ -62,6 +70,11 @@ public class PlayerController : MonoBehaviour
 		if (playerCombat != null)
 		{
 			playerCombat.AttackStarted -= LockMovementForAttack;
+		}
+
+		if (playerAnimator != null)
+		{
+			playerAnimator.AttackAnimationFinished -= UnlockMovementAfterAttack;
 		}
 	}
 
@@ -84,8 +97,9 @@ public class PlayerController : MonoBehaviour
 
 	private void Update()
 	{
-		bool attackIsActive = lockMovementDuringAttack
-			&& (attackMovementLocked || (playerCombat != null && playerCombat.IsAttacking));
+		bool attackIsActive = attackMovementLocked
+			|| attackControlLocked
+			|| (playerCombat != null && playerCombat.IsAttacking);
 		Vector2 input = Vector2.ClampMagnitude(inputReader.Move, 1f);
 		Vector3 desiredDirection = attackIsActive
 			? Vector3.zero
@@ -114,14 +128,37 @@ public class PlayerController : MonoBehaviour
 		{
 			attackMovementLocked = false;
 		}
+
 	}
 
 	private void LockMovementForAttack()
 	{
-		if (lockMovementDuringAttack)
+		attackMovementLocked = true;
+		attackControlLocked = true;
+		planarVelocity = Vector3.zero;
+		RotateTowardsCamera();
+	}
+
+	private void UnlockMovementAfterAttack()
+	{
+		attackMovementLocked = false;
+		attackControlLocked = false;
+		planarVelocity = Vector3.zero;
+	}
+
+	private void RotateTowardsCamera()
+	{
+		if (cameraTransform == null)
 		{
-			attackMovementLocked = true;
-			planarVelocity = Vector3.zero;
+			return;
+		}
+
+		Vector3 cameraForward = cameraTransform.forward;
+		cameraForward.y = 0f;
+
+		if (cameraForward.sqrMagnitude > 0.001f)
+		{
+			transform.rotation = Quaternion.LookRotation(cameraForward.normalized, Vector3.up);
 		}
 	}
 
@@ -167,7 +204,7 @@ public class PlayerController : MonoBehaviour
 				IsJumping = false;
 			}
 
-			if (inputReader.JumpPressedThisFrame)
+			if (!attackControlLocked && inputReader.JumpPressedThisFrame)
 			{
 				IsJumping = true;
 				airborneDuration = 0f;
