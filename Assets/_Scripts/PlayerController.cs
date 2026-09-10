@@ -1,12 +1,9 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PlayerInputReader))]
 public class PlayerController : MonoBehaviour
 {
-	[Header("Input")]
-	[SerializeField] private InputActionAsset inputActions;
-
 	[Header("Movement")]
 	[SerializeField, Min(0f)] private float walkSpeed = 4f;
 	[SerializeField, Min(0f)] private float sprintSpeed = 7f;
@@ -21,15 +18,14 @@ public class PlayerController : MonoBehaviour
 	[SerializeField, Min(0f)] private float groundedStickForce = 2f;
 
 	private CharacterController characterController;
-	private InputAction moveAction;
-	private InputAction jumpAction;
-	private InputAction sprintAction;
+	private PlayerInputReader inputReader;
 	private Vector3 planarVelocity;
 	private float verticalVelocity;
 
 	private void Awake()
 	{
 		characterController = GetComponent<CharacterController>();
+		inputReader = GetComponent<PlayerInputReader>();
 
 		if (cameraTransform == null && Camera.main != null)
 		{
@@ -37,37 +33,11 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
-	private void OnEnable()
-	{
-		if (inputActions == null)
-		{
-			Debug.LogError("PlayerController: assignez InputSystem_Actions dans l'inspecteur.", this);
-			enabled = false;
-			return;
-		}
-
-		InputActionMap playerMap = inputActions.FindActionMap("Player", true);
-		moveAction = playerMap.FindAction("Move", true);
-		jumpAction = playerMap.FindAction("Jump", true);
-		sprintAction = playerMap.FindAction("Sprint", true);
-
-		moveAction.Enable();
-		jumpAction.Enable();
-		sprintAction.Enable();
-	}
-
-	private void OnDisable()
-	{
-		moveAction?.Disable();
-		jumpAction?.Disable();
-		sprintAction?.Disable();
-	}
-
 	private void Update()
 	{
-		Vector2 input = Vector2.ClampMagnitude(moveAction.ReadValue<Vector2>(), 1f);
+		Vector2 input = Vector2.ClampMagnitude(inputReader.Move, 1f);
 		Vector3 desiredDirection = GetCameraRelativeDirection(input);
-		bool sprinting = sprintAction.IsPressed() && input.sqrMagnitude > 0.01f;
+		bool sprinting = inputReader.SprintHeld && input.sqrMagnitude > 0.01f;
 		float targetSpeed = sprinting ? sprintSpeed : walkSpeed;
 		Vector3 targetVelocity = desiredDirection * (targetSpeed * input.magnitude);
 
@@ -122,7 +92,7 @@ public class PlayerController : MonoBehaviour
 				verticalVelocity = -groundedStickForce;
 			}
 
-			if (jumpAction.WasPressedThisFrame())
+			if (inputReader.JumpPressedThisFrame)
 			{
 				verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
 			}

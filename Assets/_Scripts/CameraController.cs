@@ -4,8 +4,8 @@ using UnityEngine.InputSystem;
 public class CameraController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private InputActionAsset inputActions;
     [SerializeField] private Transform target;
+    [SerializeField] private PlayerInputReader inputReader;
 
     [Header("Orbit")]
     [SerializeField, Min(0.1f)] private float distance = 4f;
@@ -19,7 +19,6 @@ public class CameraController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float collisionRadius = 0.2f;
     [SerializeField, Min(0f)] private float collisionPadding = 0.1f;
 
-    private InputAction lookAction;
     private Vector3 positionVelocity;
     private float yaw;
     private float pitch = 15f;
@@ -33,27 +32,29 @@ public class CameraController : MonoBehaviour
             return;
         }
 
+        if (inputReader == null)
+        {
+            inputReader = target.GetComponent<PlayerInputReader>();
+        }
+
+        if (inputReader == null)
+        {
+            Debug.LogError("CameraController: aucun PlayerInputReader n'a ete trouve sur la cible.", this);
+            enabled = false;
+            return;
+        }
+
         yaw = target.eulerAngles.y;
     }
 
     private void OnEnable()
     {
-        if (inputActions == null)
-        {
-            Debug.LogError("CameraController: assignez InputSystem_Actions dans l'inspecteur.", this);
-            enabled = false;
-            return;
-        }
-
-        lookAction = inputActions.FindActionMap("Player", true).FindAction("Look", true);
-        lookAction.Enable();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     private void OnDisable()
     {
-        lookAction?.Disable();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -77,7 +78,7 @@ public class CameraController : MonoBehaviour
 
     private void UpdateOrbit()
     {
-        Vector2 look = lookAction.ReadValue<Vector2>();
+        Vector2 look = inputReader.Look;
         bool usingGamepad = Gamepad.current != null && Gamepad.current.rightStick.ReadValue().sqrMagnitude > 0.001f;
         float sensitivity = usingGamepad ? gamepadSensitivity * Time.deltaTime : mouseSensitivity;
 
