@@ -12,9 +12,9 @@ public class Projectile : MonoBehaviour
     private GameObject impactPrefab;
     private float impactLifetime;
     private Vector3 impactOffset;
-    private bool logProjectileEvents;
     private float travelledDistance;
     private bool initialized;
+    private RaycastHit[] hitBuffer;
 
     public void Initialize(
         Vector3 direction,
@@ -26,8 +26,7 @@ public class Projectile : MonoBehaviour
         GameObject source,
         GameObject impactPrefab,
         float impactLifetime,
-        Vector3 impactOffset,
-        bool logProjectileEvents)
+        Vector3 impactOffset)
     {
         this.direction = direction.normalized;
         this.speed = speed;
@@ -39,7 +38,7 @@ public class Projectile : MonoBehaviour
         this.impactPrefab = impactPrefab;
         this.impactLifetime = impactLifetime;
         this.impactOffset = impactOffset;
-        this.logProjectileEvents = logProjectileEvents;
+        hitBuffer = new RaycastHit[16];
         initialized = true;
 
         transform.rotation = Quaternion.LookRotation(this.direction);
@@ -82,18 +81,26 @@ public class Projectile : MonoBehaviour
     {
         closestHit = default;
         closestDamageable = null;
-        RaycastHit[] hits = Physics.SphereCastAll(
+        int hitCount = Physics.SphereCastNonAlloc(
             start,
             radius,
             direction,
+            hitBuffer,
             movement.magnitude,
             targetLayers,
             QueryTriggerInteraction.Ignore);
 
         float nearestDistance = float.MaxValue;
 
-        foreach (RaycastHit hit in hits)
+        for (int index = 0; index < hitCount; index++)
         {
+            RaycastHit hit = hitBuffer[index];
+
+            if (hit.collider == null)
+            {
+                continue;
+            }
+
             if (hit.collider.transform.IsChildOf(source.transform)
                 || hit.collider.transform == source.transform)
             {

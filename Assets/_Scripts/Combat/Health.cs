@@ -20,6 +20,7 @@ public class Health : MonoBehaviour, IDamageable
     public event Action<GameObject> Died;
 
     private MaterialPropertyBlock propertyBlock;
+    private MaterialPropertyBlock[] originalPropertyBlocks;
     private Coroutine damageFlashRoutine;
     private int baseColorPropertyId;
     private int colorPropertyId;
@@ -34,6 +35,20 @@ public class Health : MonoBehaviour, IDamageable
         if (damageRenderers == null || damageRenderers.Length == 0)
         {
             damageRenderers = GetComponentsInChildren<Renderer>();
+        }
+
+        originalPropertyBlocks = new MaterialPropertyBlock[damageRenderers.Length];
+
+        for (int index = 0; index < damageRenderers.Length; index++)
+        {
+            if (damageRenderers[index] == null)
+            {
+                continue;
+            }
+
+            MaterialPropertyBlock originalBlock = new MaterialPropertyBlock();
+            damageRenderers[index].GetPropertyBlock(originalBlock);
+            originalPropertyBlocks[index] = originalBlock;
         }
     }
 
@@ -112,14 +127,16 @@ public class Health : MonoBehaviour, IDamageable
 
     private void ClearFlashColor()
     {
-        foreach (Renderer damageRenderer in damageRenderers)
+        for (int index = 0; index < damageRenderers.Length; index++)
         {
+            Renderer damageRenderer = damageRenderers[index];
+
             if (damageRenderer == null)
             {
                 continue;
             }
 
-            damageRenderer.SetPropertyBlock(null);
+            damageRenderer.SetPropertyBlock(originalPropertyBlocks[index]);
         }
     }
 }

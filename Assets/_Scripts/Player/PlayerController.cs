@@ -3,6 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInputReader))]
+[RequireComponent(typeof(PlayerStats))]
 public class PlayerController : MonoBehaviour
 {
 	[Header("Movement")]
@@ -18,13 +19,11 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] private float gravity = -25f;
 	[SerializeField, Min(0f)] private float groundedStickForce = 2f;
 
-	[Header("Combat movement")]
-	[SerializeField] private bool lockMovementDuringAttack = true;
-
 	private CharacterController characterController;
 	private PlayerInputReader inputReader;
 	private PlayerCombat playerCombat;
 	private PlayerAnimator playerAnimator;
+	private PlayerStats playerStats;
 	private Vector3 planarVelocity;
 	private float verticalVelocity;
 	private bool attackMovementLocked;
@@ -44,6 +43,7 @@ public class PlayerController : MonoBehaviour
 		inputReader = GetComponent<PlayerInputReader>();
 		playerCombat = GetComponent<PlayerCombat>();
 		playerAnimator = GetComponent<PlayerAnimator>();
+		playerStats = GetComponent<PlayerStats>();
 		ValidateCharacterController();
 
 		if (cameraTransform == null && Camera.main != null)
@@ -105,7 +105,7 @@ public class PlayerController : MonoBehaviour
 			? Vector3.zero
 			: GetCameraRelativeDirection(input);
 		bool sprinting = inputReader.SprintHeld && input.sqrMagnitude > 0.01f;
-		float targetSpeed = sprinting ? sprintSpeed : walkSpeed;
+		float targetSpeed = (sprinting ? sprintSpeed : walkSpeed) * playerStats.MoveSpeedMultiplier;
 		Vector3 targetVelocity = attackIsActive
 			? Vector3.zero
 			: desiredDirection * (targetSpeed * input.magnitude);
@@ -123,11 +123,6 @@ public class PlayerController : MonoBehaviour
 
 		Vector3 movement = planarVelocity + Vector3.up * verticalVelocity;
 		characterController.Move(movement * Time.deltaTime);
-
-		if (attackMovementLocked && (playerCombat == null || !playerCombat.IsAttacking))
-		{
-			attackMovementLocked = false;
-		}
 
 	}
 

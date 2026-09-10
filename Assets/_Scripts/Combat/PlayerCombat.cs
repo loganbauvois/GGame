@@ -27,6 +27,7 @@ public class PlayerCombat : MonoBehaviour
 
     private PlayerInputReader inputReader;
     private PlayerController playerController;
+    private PlayerStats playerStats;
     private float attackTimer;
     private float cooldownTimer;
 
@@ -34,6 +35,7 @@ public class PlayerCombat : MonoBehaviour
     {
         inputReader = GetComponent<PlayerInputReader>();
         playerController = GetComponent<PlayerController>();
+        playerStats = GetComponent<PlayerStats>();
 
         if (attackOrigin == null)
         {
@@ -121,13 +123,12 @@ public class PlayerCombat : MonoBehaviour
             projectileSpeed,
             projectileMaxDistance,
             projectileRadius,
-            damage,
+            damage * playerStats.DamageMultiplier,
             targetLayers,
             gameObject,
             impactPrefab,
             impactLifetime,
-            impactOffset,
-            logCombatEvents);
+            impactOffset);
 
         if (logCombatEvents)
         {

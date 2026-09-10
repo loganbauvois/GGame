@@ -14,8 +14,6 @@ public class PlayerAnimator : MonoBehaviour
     [SerializeField] private string speedParameter = "Speed";
     [SerializeField] private string groundedParameter = "Grounded";
     [SerializeField] private string verticalSpeedParameter = "VerticalSpeed";
-    [SerializeField] private string jumpTrigger = "Jump";
-    [SerializeField] private string attackTrigger = "Attack";
     [SerializeField] private string locomotionState = "Locomotion";
     [SerializeField] private string jumpState = "Jump";
     [SerializeField] private string fallState = "Falling";
@@ -23,7 +21,6 @@ public class PlayerAnimator : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float nonLoopingAnimationEnd = 0.95f;
     [SerializeField, Min(0f)] private float locomotionTransitionDuration = 0.12f;
     [SerializeField, Min(0f)] private float jumpTransitionDuration = 0.08f;
-    [SerializeField, Min(0f)] private float attackTransitionDuration = 0.04f;
     [Tooltip("Pourcentage de progression du clip Fireball. 0.75 = 75 %, 0.98 = 98 %.")]
     [SerializeField, Range(0f, 1f)] private float projectileLaunchNormalizedTime = 0.98f;
     [SerializeField, Min(0f)] private float longFallDuration = 0.35f;
@@ -33,8 +30,6 @@ public class PlayerAnimator : MonoBehaviour
     private int speedHash;
     private int groundedHash;
     private int verticalSpeedHash;
-    private int jumpTriggerHash;
-    private int attackHash;
     private int locomotionStateHash;
     private int jumpStateHash;
     private int fallStateHash;
@@ -56,11 +51,6 @@ public class PlayerAnimator : MonoBehaviour
         playerController ??= GetComponent<PlayerController>();
         playerCombat ??= GetComponent<PlayerCombat>();
 
-        if (attackState == "Boxing")
-        {
-            attackState = "Fireball";
-        }
-
         if (animator != null)
         {
             animator.applyRootMotion = false;
@@ -69,8 +59,6 @@ public class PlayerAnimator : MonoBehaviour
         speedHash = Animator.StringToHash(speedParameter);
         groundedHash = Animator.StringToHash(groundedParameter);
         verticalSpeedHash = Animator.StringToHash(verticalSpeedParameter);
-        jumpTriggerHash = Animator.StringToHash(jumpTrigger);
-        attackHash = Animator.StringToHash(attackTrigger);
         locomotionStateHash = Animator.StringToHash(locomotionState);
         jumpStateHash = Animator.StringToHash(jumpState);
         fallStateHash = Animator.StringToHash(fallState);
@@ -241,11 +229,6 @@ public class PlayerAnimator : MonoBehaviour
 
         attackAnimationLocked = true;
         animator.Play(attackStateHash, 0, 0f);
-
-        if (!string.IsNullOrWhiteSpace(attackTrigger) && animator.parameters.Length > 0)
-        {
-            animator.SetTrigger(attackHash);
-        }
     }
 
     private void OnJumpStarted()
@@ -256,6 +239,5 @@ public class PlayerAnimator : MonoBehaviour
         }
 
         animator.CrossFadeInFixedTime(jumpStateHash, jumpTransitionDuration, 0, 0f);
-        animator.SetTrigger(jumpTriggerHash);
     }
 }
