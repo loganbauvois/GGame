@@ -9,12 +9,14 @@ public class PlayerInputReader : MonoBehaviour
     public Vector2 Look => lookAction.ReadValue<Vector2>();
     public bool SprintHeld => sprintAction.IsPressed();
     public bool JumpPressedThisFrame => jumpAction.WasPressedThisFrame();
+    public bool AttackPressedThisFrame => attackAction.WasPressedThisFrame();
 
     private InputActionMap playerMap;
     private InputAction moveAction;
     private InputAction lookAction;
     private InputAction sprintAction;
     private InputAction jumpAction;
+    private InputAction attackAction;
 
     private void Awake()
     {
@@ -30,6 +32,7 @@ public class PlayerInputReader : MonoBehaviour
         lookAction = playerMap.FindAction("Look", true);
         sprintAction = playerMap.FindAction("Sprint", true);
         jumpAction = playerMap.FindAction("Jump", true);
+        attackAction = playerMap.FindAction("Attack", true);
     }
 
     private void OnEnable()
