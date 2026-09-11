@@ -157,6 +157,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PickupItem
   icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
   statType: 0
-  bonus: 0.2
+  bonus: 1
   rotationSpeed: 90
   lifetime: 0
