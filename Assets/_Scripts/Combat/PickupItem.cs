@@ -9,6 +9,7 @@ public class PickupItem : MonoBehaviour
     }
 
     [Header("Pickup")]
+    [SerializeField] private Sprite icon;
     [SerializeField] private StatType statType;
     [SerializeField, Min(0f)] private float bonus = 0.1f;
     [SerializeField, Min(0f)] private float rotationSpeed = 90f;
@@ -32,6 +33,13 @@ public class PickupItem : MonoBehaviour
         PlayerStats playerStats = other.GetComponentInParent<PlayerStats>();
 
         if (playerStats == null)
+        {
+            return;
+        }
+
+        PlayerInventory inventory = playerStats.GetComponent<PlayerInventory>();
+
+        if (inventory == null || !inventory.TryAddItem(icon))
         {
             return;
         }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -8,14 +9,17 @@ public class PlayerStats : MonoBehaviour
 
     public float MoveSpeedMultiplier => moveSpeedMultiplier;
     public float DamageMultiplier => damageMultiplier;
+    public event Action StatsChanged;
 
     public void AddMoveSpeedMultiplier(float amount)
     {
         moveSpeedMultiplier = Mathf.Max(0f, moveSpeedMultiplier + amount);
+        StatsChanged?.Invoke();
     }
 
     public void AddDamageMultiplier(float amount)
     {
         damageMultiplier = Mathf.Max(0f, damageMultiplier + amount);
+        StatsChanged?.Invoke();
     }
 }

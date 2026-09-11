@@ -4,6 +4,8 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInputReader))]
 [RequireComponent(typeof(PlayerStats))]
+[RequireComponent(typeof(PlayerInventory))]
+[RequireComponent(typeof(InventoryBarUI))]
 public class PlayerController : MonoBehaviour
 {
 	[Header("Movement")]
