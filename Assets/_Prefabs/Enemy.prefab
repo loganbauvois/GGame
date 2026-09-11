@@ -75,7 +75,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHealth: 100
-  destroyOnDeath: 0
+  destroyOnDeath: 1
   flashOnDamage: 1
   damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
   damageFlashDuration: 0.12
@@ -148,6 +148,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f25eb43cc216c0b428effe01b45d1c9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyLootDropper
+  scatterRadius: 1
+  raycastHeight: 3
+  raycastDistance: 10
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   drops:
   - prefab: {fileID: 2284889580202434309, guid: c92da3fb7f70d5c44a027ea10a4b0a46, type: 3}
     dropChance: 1
