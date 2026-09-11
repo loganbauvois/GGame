@@ -15,6 +15,8 @@ public class PickupItem : MonoBehaviour
     [SerializeField, Min(0f)] private float rotationSpeed = 90f;
     [SerializeField, Min(0f)] private float lifetime;
 
+    private bool collected;
+
     private void Start()
     {
         if (lifetime > 0f)
@@ -30,6 +32,11 @@ public class PickupItem : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (collected)
+        {
+            return;
+        }
+
         PlayerStats playerStats = other.GetComponentInParent<PlayerStats>();
 
         if (playerStats == null)
@@ -43,6 +50,8 @@ public class PickupItem : MonoBehaviour
         {
             return;
         }
+
+        collected = true; // verrouille immédiatement, avant même Destroy
 
         switch (statType)
         {
